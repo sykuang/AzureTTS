@@ -17,7 +17,7 @@ def tts(text: str, voice_name: str, filename: str):
     else:
         audio_config = speechsdk.audio.AudioOutputConfig(filename=filename)
     # The language of the voice that speaks.
-    speech_config.speech_synthesis_voice_name = "en-US-AshleyNeural"
+    speech_config.speech_synthesis_voice_name = voice_name
 
     speech_synthesizer = speechsdk.SpeechSynthesizer(
         speech_config=speech_config, audio_config=audio_config
