@@ -16,13 +16,23 @@
 ### Help
 
 ```
-  -h, --help           show this help message and exit
-  --filename FILENAME  Output filename
-  --text TEXT          Text to speak
-  --voice VOICE        Voice to use
-  --play               Play the output or store in filename
-  --script SCRIPT      Script to read
+  -h, --help            show this help message and exit
+  --filename FILENAME   Output filename
+  --text TEXT           Text to speak
+  --voice VOICE         Voice to use
+  --style STYLE         Voice style to use, this arugment will be the default style if script is provided. Default is chat
+  --styledegree STYLEDEGREE
+                        Voice style degree, this arugment will be the default style degree if script is provided. Default is 1
+  --play                Play the output or store in filename
 ```
+### Add voice style to your script in each line.
+To adjust the voice style, `add style,styledegree:` at the beginning of each line. If no style is specified, the default voice style will be used, which can be adjusted using the `--style` option.
+```
+excited,2:Creates a speech synthesizer with a null output stream.
+This means the audio output data will not be written to any output channel.
+You can just get the audio from the result.
+```
+
 ### Voice list
 Language|Text-to-speech voice|Gender
 --|--|--|

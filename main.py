@@ -8,7 +8,22 @@ SPEECH_KEY = getenv("SPEECH_KEY")
 SPEECH_REGION = getenv("SPEECH_REGION")
 
 
-def tts(text: str, voice_name: str, filename: str):
+def generate_ssml(text: str, voice_name: str, style: str = "chat", stydegree: int = 1):
+    ssml = (
+        '<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xmlns:mstts="https://www.w3.org/2001/mstts" xml:lang="en-US">'
+        f'<voice name="{voice_name}">'
+        f'<mstts:express-as style="{style}" styledegree="{stydegree}">'
+        f"{ text }"
+        "</mstts:express-as>"
+        "</voice>"
+        "</speak>"
+    )
+    return ssml
+
+
+def tts(
+    text: str, voice_name: str, filename: str, style: str = "chat", stydegree: int = 1
+):
     speech_config = speechsdk.SpeechConfig(
         subscription=SPEECH_KEY, region=SPEECH_REGION
     )
@@ -23,11 +38,8 @@ def tts(text: str, voice_name: str, filename: str):
         speech_config=speech_config, audio_config=audio_config
     )
 
-    # Get text from the console and synthesize to the default speaker.
-    # print("Enter some text that you want to speak >")
-    # text = input
-
-    speech_synthesis_result = speech_synthesizer.speak_text_async(text).get()
+    ssml = generate_ssml(text, voice_name, style, stydegree)
+    speech_synthesis_result = speech_synthesizer.speak_ssml_async(ssml).get()
 
     if (
         speech_synthesis_result.reason
@@ -45,21 +57,51 @@ def tts(text: str, voice_name: str, filename: str):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--filename", type=str, default="tts.wav",help="Output filename")
-    parser.add_argument("--text", type=str, default="Hello world",help="Text to speak")
-    parser.add_argument("--voice", type=str, default="en-US-AshleyNeural",help="Voice to use")
-    parser.add_argument("--play", action="store_true", default=False,help="Play the output or store in filename")
+    parser.add_argument(
+        "--filename", type=str, default="tts.wav", help="Output filename"
+    )
+    parser.add_argument("--text", type=str, default="Hello world", help="Text to speak")
+    parser.add_argument(
+        "--voice", type=str, default="en-US-JennyNeural", help="Voice to use"
+    )
+    parser.add_argument(
+        "--style",
+        type=str,
+        default="chat",
+        help="Voice style to use, this arugment will be the default style if script is provided. Default is chat",
+    )
+    parser.add_argument(
+        "--styledegree",
+        type=int,
+        default=1,
+        help="Voice style degree, this arugment will be the default style degree if script is provided. Default is 1",
+    )
+    parser.add_argument(
+        "--play",
+        action="store_true",
+        default=False,
+        help="Play the output or store in filename",
+    )
     parser.add_argument("--script", type=str, help="Script to read")
     args = parser.parse_args()
     if args.script:
         with open(args.script) as f:
-            cnt=1
+            cnt = 1
             for line in f.readlines():
-                tts(line, args.voice, f"tts{cnt}.wav")
-                cnt+=1
+                ls = line.split(":")
+                style = args.style
+                styledegree = args.styledegree
+                if len(ls) == 2:
+                    style = ls[0].split(",")[0]
+                    styledegree = ls[0].split(",")[1]
+                    text = ls[1]
+                else:
+                    text = line
+                tts(text, args.voice, f"tts{cnt}.wav", style, styledegree)
+                cnt += 1
     else:
         filename = "" if args.play else args.filename
-        tts(args.text, args.voice, filename)
+        tts(args.text, args.voice, filename, args.style, args.styledegree)
 
 
 if __name__ == "__main__":
